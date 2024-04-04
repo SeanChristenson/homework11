@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 11</title>
+  <style>
+    #canvas {
+      border: 8px solid rgb(255, 50, 214);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="600" height="400"></canvas>
+  <audio id="bgMusic" autoplay loop>
+    <source src="background_music.mp3" type="audio/mpeg">
+  </audio>
+  <script>
+
+    class GameObject {
+      constructor(x, y, width, height, color) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.color = color;
+        this.velocityX = Math.random() * 2 - 1; 
+        this.velocityY = Math.random() * 2 - 1;
+      }
+
+      draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+
+      update() {
+        this.x += this.velocityX;
+        this.y += this.velocityY;
+      }
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+
+    const controlledObject = new GameObject(50, 50, 20, 20, 'blue');
+    const autonomousObject = new GameObject(200, 200, 30, 30, 'red');
+
+
+    function checkCollision(obj1, obj2) {
+      return obj1.x < obj2.x + obj2.width &&
+             obj1.x + obj1.width > obj2.x &&
+             obj1.y < obj2.y + obj2.height &&
+             obj1.y + obj1.height > obj2.y;
+    }
+
+    function update() {
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+      controlledObject.draw(ctx);
+      autonomousObject.draw(ctx);
+
+      document.addEventListener('keydown', (event) => {
+        switch(event.key) {
+          case 'ArrowLeft':
+            controlledObject.x -= 5;
+            break;
+          case 'ArrowRight':
+            controlledObject.x += 5;
+            break;
+          case 'ArrowUp':
+            controlledObject.y -= 5;
+            break;
+          case 'ArrowDown':
+            controlledObject.y += 5;
+            break;
+        }
+      });
+
+      autonomousObject.update();
+
+
+      if (checkCollision(controlledObject, autonomousObject)) {
+
+        canvas.style.backgroundColor = 'yellow';
+
+        controlledObject.width += 5;
+        controlledObject.height += 5;
+        autonomousObject.width += 5;
+        autonomousObject.height += 5;
+      } else {
+        canvas.style.backgroundColor = 'white'; 
+      }
+
+
+      if (controlledObject.x < 0) controlledObject.x = 0;
+      if (controlledObject.y < 0) controlledObject.y = 0;
+      if (controlledObject.x + controlledObject.width > canvas.width) controlledObject.x = canvas.width - controlledObject.width;
+      if (controlledObject.y + controlledObject.height > canvas.height) controlledObject.y = canvas.height - controlledObject.height;
+      if (autonomousObject.x < 0) autonomousObject.velocityX *= -1;
+      if (autonomousObject.y < 0) autonomousObject.velocityY *= -1;
+      if (autonomousObject.x + autonomousObject.width > canvas.width) autonomousObject.velocityX *= -1;
+      if (autonomousObject.y + autonomousObject.height > canvas.height) autonomousObject.velocityY *= -1;
+
+
+      requestAnimationFrame(update);
+    }
+
+
+    update();
+  </script>
+</body>
+</html>
